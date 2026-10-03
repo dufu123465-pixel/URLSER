@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>网址导航 - 各领域官网大全</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --text: #1f2430;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --accent: #4f6ef2;
+    --shadow: 0 1px 3px rgba(17, 24, 39, .08);
+    --shadow-hover: 0 10px 24px rgba(17, 24, 39, .13);
+    --chip-bg: rgba(245, 246, 250, .85);
+    --chip-hover: rgba(79, 110, 242, .08);
+  }
+  body.dark {
+    --bg: #0f1420;
+    --card: #171e2e;
+    --text: #e5e9f2;
+    --muted: #8b93a7;
+    --line: #262f45;
+    --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+    --shadow-hover: 0 10px 24px rgba(0, 0, 0, .5);
+    --chip-bg: rgba(15, 20, 32, .85);
+    --chip-hover: rgba(79, 110, 242, .18);
+  }
+  body {
+    font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background .25s, color .25s;
+  }
+  #themeBtn {
+    position: fixed; top: 14px; right: 16px; z-index: 60;
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--card);
+    cursor: pointer; font-size: 17px; box-shadow: var(--shadow);
+    display: flex; align-items: center; justify-content: center;
+  }
+  header { text-align: center; padding: 46px 16px 8px; }
+  header h1 {
+    font-size: 34px; letter-spacing: 1px;
+    background: linear-gradient(90deg, #4f6ef2, #9b5cf6, #22c1dc);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  header .sub { margin-top: 8px; font-size: 14px; color: var(--muted); }
+  .search-wrap { position: relative; max-width: 660px; margin: 26px auto 10px; }
+  .search-wrap svg {
+    position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+    width: 19px; height: 19px; color: var(--muted); pointer-events: none;
+  }
+  #q {
+    width: 100%; font-size: 15.5px; color: var(--text);
+    padding: 15px 46px 15px 48px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--card);
+    box-shadow: var(--shadow); outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  #q::placeholder { color: var(--muted); }
+  #q:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79, 110, 242, .15); }
+  #clearBtn {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    width: 26px; height: 26px; border-radius: 50%; border: none;
+    background: var(--line); color: var(--muted); font-size: 14px;
+    cursor: pointer; display: none; line-height: 1;
+  }
+  #clearBtn.show { display: block; }
+  #stats { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  #chips {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    padding: 12px 16px; background: var(--chip-bg);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .chip {
+    padding: 7px 14px; border-radius: 999px; font-size: 13px;
+    border: 1px solid var(--line); background: var(--card);
+    color: var(--text); cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { background: var(--chip-hover); }
+  .chip.active {
+    background: linear-gradient(90deg, #4f6ef2, #6a5cf6);
+    color: #fff; border-color: transparent;
+  }
+  main { max-width: 1200px; margin: 0 auto; padding: 6px 20px 30px; }
+  section { margin-top: 28px; }
+  section h2 { display: flex; align-items: center; gap: 8px; font-size: 17px; margin-bottom: 14px; }
+  section h2 .cnt {
+    font-size: 12px; font-weight: 400; color: var(--muted);
+    background: var(--chip-hover); padding: 1px 9px; border-radius: 999px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 13px; }
+  .card {
+    display: flex; flex-direction: column; gap: 10px; padding: 15px 16px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    cursor: pointer; transition: transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: #b9c6fb; }
+  body.dark .card:hover { border-color: #3b4a6e; }
+  .card .top { display: flex; align-items: center; gap: 12px; }
+  .avatar {
+    position: relative; overflow: hidden; flex: none;
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 18px; user-select: none;
+  }
+  .avatar img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: 0; transition: opacity .2s; background: #fff;
+  }
+  .avatar img.on { opacity: 1; }
+  .meta { min-width: 0; }
+  .name { font-size: 15px; font-weight: 600; }
+  .desc {
+    font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .urlbtn {
+    align-self: flex-start; font-size: 12px; color: var(--accent);
+    background: transparent; border: 1px dashed transparent; border-radius: 6px;
+    padding: 1px 6px; margin-left: -6px; cursor: copy; font-family: inherit;
+    max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .urlbtn:hover { background: var(--chip-hover); border-color: var(--accent); }
+  mark { background: rgba(255, 200, 0, .45); color: inherit; border-radius: 3px; padding: 0 1px; }
+  .empty { display: none; text-align: center; padding: 80px 16px; color: var(--muted); }
+  .empty.show { display: block; }
+  .empty .big { font-size: 46px; margin-bottom: 12px; }
+  .empty p { font-size: 14px; margin-bottom: 18px; }
+  .empty button {
+    padding: 9px 22px; border-radius: 999px; border: none; cursor: pointer;
+    background: linear-gradient(90deg, #4f6ef2, #6a5cf6); color: #fff; font-size: 14px;
+  }
+  #toast {
+    position: fixed; left: 50%; bottom: 32px; z-index: 99;
+    transform: translateX(-50%) translateY(20px); opacity: 0;
+    background: #111827; color: #fff; font-size: 13px;
+    padding: 9px 18px; border-radius: 999px; pointer-events: none;
+    transition: all .25s; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  footer { padding: 26px 16px 42px; text-align: center; color: var(--muted); font-size: 12.5px; line-height: 1.9; }
+  @media (max-width: 560px) {
+    header { padding-top: 34px; }
+    header h1 { font-size: 26px; }
+    main { padding: 6px 12px 20px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+  }
+</style>
+</head>
+<body>
+<button id="themeBtn" title="切换深色/浅色模式">🌙</button>
+
+<header>
+  <h1>🧭 网址导航</h1>
+  <p class="sub">收录各领域常用网站官方入口 · 搜索名称一键直达官网</p>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line>
+    </svg>
+    <input id="q" type="text" placeholder="输入网站名称或关键词，如：知乎、AI、地图、GitHub…" autofocus>
+    <button id="clearBtn" title="清空搜索">×</button>
+  </div>
+  <div id="stats"></div>
+</header>
+
+<nav id="chips"></nav>
+
+<main id="root"></main>
+
+<div id="empty" class="empty">
+  <div class="big">🔍</div>
+  <p>没有找到相关网站，试试其他关键词，或换个分类看看</p>
+  <button id="resetBtn">清除搜索和筛选</button>
+</div>
+
+<footer>
+  💡 点击卡片直达官网 · 点击网址复制链接 · 快捷键：<b>/</b> 聚焦搜索 · <b>Enter</b> 打开第一个结果 · <b>Esc</b> 清空<br>
+  链接为静态收录的官方网站地址，如遇失效请以搜索引擎结果为准
+</footer>
+
+<div id="toast"></div>
+
+<noscript>本页面需要启用 JavaScript 才能搜索和浏览网站列表。</noscript>
+
+<script>
+const CATS = [
+  ['搜索引擎', '🔍'], ['AI 工具', '🤖'], ['开发编程', '💻'], ['学习教育', '📚'],
+  ['办公协作', '📋'], ['网盘存储', '☁️'], ['社交社区', '💬'], ['视频娱乐', '🎬'],
+  ['音乐', '🎵'], ['购物电商', '🛒'], ['新闻资讯', '📰'], ['实用工具', '🔧'],
+  ['设计素材', '🎨'], ['邮箱服务', '📧'], ['出行生活', '🚄'], ['金融理财', '💰'],
+  ['游戏平台', '🎮'], ['招聘求职', '💼']
+];
+
+// [名称, 官网URL, 简介, 分类, 搜索关键词(可选)]
+const SITES = [
+  // 搜索引擎
+  ['百度', 'https://www.baidu.com', '全球最大中文搜索引擎', '搜索引擎', 'baidu 搜索'],
+  ['必应', 'https://www.bing.com', '微软旗下搜索引擎', '搜索引擎', 'bing 微软'],
+  ['Google', 'https://www.google.com', '全球最大的搜索引擎', '搜索引擎', '谷歌 google'],
+  ['搜狗搜索', 'https://www.sogou.com', '腾讯旗下搜索引擎', '搜索引擎', 'sogou 搜索'],
+  ['360搜索', 'https://www.so.com', '360 旗下搜索引擎', '搜索引擎', '奇虎 so'],
+  ['夸克', 'https://www.quark.cn', '夸克智能搜索入口', '搜索引擎', 'quark 夸克搜索'],
+  // AI 工具
+  ['ChatGPT', 'https://chatgpt.com', 'OpenAI 旗下 AI 对话助手', 'AI 工具', 'openai gpt 聊天'],
+  ['DeepSeek', 'https://chat.deepseek.com', '深度求索 AI 对话模型', 'AI 工具', 'deepseek 深度求索 聊天'],
+  ['Kimi', 'https://kimi.moonshot.cn', '月之暗面 AI 助手', 'AI 工具', 'kimi 月之暗面 moonshot 长文本'],
+  ['豆包', 'https://www.doubao.com', '字节跳动 AI 智能助手', 'AI 工具', 'doubao 字节 聊天'],
+  ['文心一言', 'https://yiyan.baidu.com', '百度大模型对话产品', 'AI 工具', 'ernie 百度 聊天'],
+  ['通义千问', 'https://tongyi.aliyun.com', '阿里云大模型对话产品', 'AI 工具', 'qwen 阿里 聊天'],
+  ['智谱清言', 'https://chatglm.cn', '智谱 AI 对话助手', 'AI 工具', 'chatglm 智谱 清言'],
+  ['讯飞星火', 'https://xinghuo.xfyun.cn', '科大讯飞认知大模型', 'AI 工具', '星火 讯飞'],
+  ['Claude', 'https://claude.ai', 'Anthropic 旗下 AI 助手', 'AI 工具', 'anthropic 聊天'],
+  ['Gemini', 'https://gemini.google.com', '谷歌 AI 对话助手', 'AI 工具', 'bard google 谷歌'],
+  ['Midjourney', 'https://www.midjourney.com', '知名 AI 绘画工具', 'AI 工具', 'mj ai绘画 出图'],
+  ['即梦AI', 'https://jimeng.jianying.com', '字节旗下 AI 绘画与视频生成', 'AI 工具', 'ai绘画 生图 剪映'],
+  ['秘塔AI搜索', 'https://metaso.cn', '没有广告、直达结果的 AI 搜索', 'AI 工具', 'metaso ai搜索'],
+  ['Hugging Face', 'https://huggingface.co', '全球最大 AI 模型社区', 'AI 工具', 'huggingface 模型 开源'],
+  // 开发编程
+  ['GitHub', 'https://github.com', '全球最大代码托管平台', '开发编程', 'git 开源 代码'],
+  ['Gitee', 'https://gitee.com', '国内代码托管平台（码云）', '开发编程', '码云 开源 代码'],
+  ['Stack Overflow', 'https://stackoverflow.com', '全球最大编程问答社区', '开发编程', 'stackoverflow 问答 报错'],
+  ['CSDN', 'https://www.csdn.net', '中文 IT 技术社区', '开发编程', 'csdn 博客 技术'],
+  ['掘金', 'https://juejin.cn', '开发者技术社区', '开发编程', 'juejin 博客 前端'],
+  ['博客园', 'https://www.cnblogs.com', '开发者博客平台', '开发编程', 'cnblogs 博客'],
+  ['SegmentFault', 'https://segmentfault.com', '中文开发者问答社区（思否）', '开发编程', '思否 问答'],
+  ['MDN Web Docs', 'https://developer.mozilla.org', 'Web 技术权威文档', '开发编程', 'mozilla 文档 前端'],
+  ['开源中国', 'https://www.oschina.net', '中文开源技术社区', '开发编程', 'oschina 开源'],
+  ['V2EX', 'https://www.v2ex.com', '创意工作者社区', '开发编程', '程序员 论坛'],
+  ['npm', 'https://www.npmjs.com', 'JavaScript 包管理仓库', '开发编程', 'nodejs 包 js'],
+  ['Maven Central', 'https://mvnrepository.com', 'Java 依赖包仓库', '开发编程', 'maven java 依赖'],
+  ['Docker Hub', 'https://hub.docker.com', 'Docker 镜像仓库', '开发编程', 'docker 镜像 容器'],
+  ['PyPI', 'https://pypi.org', 'Python 官方包仓库', '开发编程', 'python pip 包'],
+  ['VS Code', 'https://code.visualstudio.com', '微软开源代码编辑器', '开发编程', 'vscode 编辑器'],
+  ['JetBrains', 'https://www.jetbrains.com', 'IDE 厂商（IDEA/PyCharm）', '开发编程', 'idea pycharm ide'],
+  ['力扣', 'https://leetcode.cn', '算法刷题平台 LeetCode', '开发编程', 'leetcode 刷题 算法 面试'],
+  ['牛客网', 'https://www.nowcoder.com', '笔试面试刷题社区', '开发编程', 'nowcoder 面试 笔试'],
+  ['阿里云', 'https://www.aliyun.com', '阿里云官网', '开发编程', 'aliyun 云服务器 云计算'],
+  ['腾讯云', 'https://cloud.tencent.com', '腾讯云官网', '开发编程', '腾讯 云服务器 云计算'],
+  ['华为云', 'https://www.huaweicloud.com', '华为云官网', '开发编程', '华为 云计算'],
+  // 学习教育
+  ['中国大学MOOC', 'https://www.icourse163.org', '国家精品课程在线学习平台', '学习教育', 'mooc 慕课 大学 课程'],
+  ['学堂在线', 'https://www.xuetangx.com', '清华发起的慕课平台', '学习教育', '清华 慕课 课程'],
+  ['网易公开课', 'https://open.163.com', '名校公开课视频平台', '学习教育', '公开课 课程'],
+  ['慕课网', 'https://www.imooc.com', 'IT 技能学习平台', '学习教育', 'imooc 编程 it 课程'],
+  ['菜鸟教程', 'https://www.runoob.com', '编程基础技术教程', '学习教育', 'runoob 入门 教程'],
+  ['W3school', 'https://www.w3school.com.cn', 'Web 技术中文教程', '学习教育', 'w3school html 前端 教程'],
+  ['Coursera', 'https://www.coursera.org', '全球在线课程平台', '学习教育', 'mooc 课程 证书'],
+  ['edX', 'https://www.edx.org', '麻省理工/哈佛在线课程', '学习教育', 'mooc 课程'],
+  ['可汗学院', 'https://www.khanacademy.org', '免费在线课程平台', '学习教育', 'khan 免费课程'],
+  ['TED', 'https://www.ted.com', '高质量英语演讲平台', '学习教育', 'ted 演讲 英语'],
+  ['多邻国', 'https://www.duolingo.com', '免费语言学习平台', '学习教育', 'duolingo 英语 语言'],
+  ['学信网', 'https://www.chsi.com.cn', '中国高等教育学籍学历查询', '学习教育', '学历 学籍 查询'],
+  // 办公协作
+  ['飞书', 'https://www.feishu.cn', '字节跳动一站式协作平台', '办公协作', 'lark 字节 协作 文档'],
+  ['钉钉', 'https://www.dingtalk.com', '阿里旗下企业办公平台', '办公协作', 'dingtalk 阿里 考勤'],
+  ['腾讯文档', 'https://docs.qq.com', '腾讯在线协作文档', '办公协作', '腾讯 在线文档 协作'],
+  ['金山文档', 'https://www.kdocs.cn', 'WPS 在线协作文档', '办公协作', 'wps 在线文档'],
+  ['语雀', 'https://www.yuque.com', '阿里旗下知识管理工具', '办公协作', 'yuque 笔记 知识库'],
+  ['石墨文档', 'https://shimo.im', '在线协作文档', '办公协作', 'shimo 在线文档'],
+  ['Notion', 'https://www.notion.so', '强大的笔记与知识库工具', '办公协作', '笔记 知识库 wiki'],
+  ['幕布', 'https://mubu.com', '大纲笔记与思维导图', '办公协作', 'mubu 大纲 导图'],
+  ['ProcessOn', 'https://www.processon.com', '在线流程图与思维导图', '办公协作', '流程图 导图 绘图'],
+  ['Microsoft Office', 'https://www.office.com', 'Word/Excel/PPT 在线版', '办公协作', 'office word excel ppt'],
+  ['腾讯会议', 'https://meeting.tencent.com', '腾讯视频会议', '办公协作', '视频会议'],
+  ['Zoom', 'https://zoom.us', '国际视频会议软件', '办公协作', '视频会议 zoom'],
+  // 网盘存储
+  ['百度网盘', 'https://pan.baidu.com', '百度旗下云存储服务', '网盘存储', '网盘 存储 下载'],
+  ['阿里云盘', 'https://www.alipan.com', '阿里旗下云盘', '网盘存储', '网盘 存储'],
+  ['夸克网盘', 'https://pan.quark.cn', '夸克旗下云盘', '网盘存储', '网盘 存储'],
+  ['坚果云', 'https://www.jianguoyun.com', '文件同步与共享网盘', '网盘存储', '同步 网盘'],
+  ['OneDrive', 'https://onedrive.live.com', '微软个人云盘', '网盘存储', '微软 网盘'],
+  ['Google Drive', 'https://drive.google.com', '谷歌云盘', '网盘存储', '谷歌 网盘'],
+  ['Dropbox', 'https://www.dropbox.com', '国际知名云盘', '网盘存储', '网盘 dropbox'],
+  ['蓝奏云', 'https://pc.woozooo.com', '免登录分享网盘', '网盘存储', '网盘 分享'],
+  // 社交社区
+  ['微博', 'https://weibo.com', '中文社交媒体平台', '社交社区', 'weibo 热搜'],
+  ['知乎', 'https://www.zhihu.com', '中文问答社区', '社交社区', 'zhihu 问答'],
+  ['豆瓣', 'https://www.douban.com', '影评书评兴趣社区', '社交社区', '评分 电影 书'],
+  ['小红书', 'https://www.xiaohongshu.com', '生活方式分享社区', '社交社区', '种草 笔记'],
+  ['X (Twitter)', 'https://x.com', '全球社交平台', '社交社区', '推特 twitter'],
+  ['Facebook', 'https://www.facebook.com', '全球社交网络', '社交社区', '脸书 fb'],
+  ['Instagram', 'https://www.instagram.com', '图片视频社交平台', '社交社区', 'ins 图片'],
+  ['Reddit', 'https://www.reddit.com', '全球最大论坛社区', '社交社区', '论坛 社区'],
+  ['LinkedIn', 'https://www.linkedin.com', '全球职场社交平台', '社交社区', '领英 职场'],
+  ['Discord', 'https://discord.com', '语音文字聊天社区', '社交社区', '聊天 语音 社区'],
+  ['Telegram', 'https://telegram.org', '加密即时通讯工具', '社交社区', '电报 tg 聊天'],
+  ['WhatsApp', 'https://www.whatsapp.com', '全球即时通讯工具', '社交社区', '聊天 通讯'],
+  ['百度贴吧', 'https://tieba.baidu.com', '中文兴趣论坛', '社交社区', '贴吧 论坛'],
+  // 视频娱乐
+  ['哔哩哔哩', 'https://www.bilibili.com', '年轻一代视频社区（B站）', '视频娱乐', 'b站 bilibili 弹幕 up主'],
+  ['YouTube', 'https://www.youtube.com', '全球最大视频网站', '视频娱乐', '油管 yt 视频'],
+  ['爱奇艺', 'https://www.iqiyi.com', '综合视频平台', '视频娱乐', '视频 剧集 综艺'],
+  ['腾讯视频', 'https://v.qq.com', '腾讯旗下视频平台', '视频娱乐', '视频 剧集'],
+  ['优酷', 'https://www.youku.com', '阿里旗下视频平台', '视频娱乐', '视频 剧集'],
+  ['芒果TV', 'https://www.mgtv.com', '湖南卫视视频平台', '视频娱乐', '综艺 剧集'],
+  ['西瓜视频', 'https://www.ixigua.com', '字节旗下中长视频平台', '视频娱乐', '字节 视频'],
+  ['抖音', 'https://www.douyin.com', '短视频平台', '视频娱乐', '短视频 douyin'],
+  ['快手', 'https://www.kuaishou.com', '短视频社区', '视频娱乐', '短视频'],
+  ['Netflix', 'https://www.netflix.com', '全球流媒体平台', '视频娱乐', '奈飞 美剧'],
+  ['Twitch', 'https://www.twitch.tv', '游戏直播平台', '视频娱乐', '直播 游戏'],
+  ['虎牙直播', 'https://www.huya.com', '游戏直播平台', '视频娱乐', '直播 游戏'],
+  ['斗鱼', 'https://www.douyu.com', '游戏直播平台', '视频娱乐', '直播 游戏'],
+  // 音乐
+  ['网易云音乐', 'https://music.163.com', '网易旗下音乐平台', '音乐', '网易云 歌单'],
+  ['QQ音乐', 'https://y.qq.com', '腾讯旗下音乐平台', '音乐', '腾讯 音乐'],
+  ['酷狗音乐', 'https://www.kugou.com', '在线音乐播放器', '音乐', '酷狗'],
+  ['酷我音乐', 'https://www.kuwo.cn', '在线音乐平台', '音乐', '酷我'],
+  ['咪咕音乐', 'https://music.migu.cn', '中国移动音乐平台', '音乐', '咪咕 中国移动'],
+  ['Spotify', 'https://open.spotify.com', '全球流媒体音乐平台', '音乐', 'spotify'],
+  ['Apple Music', 'https://music.apple.com', '苹果音乐服务', '音乐', '苹果 music'],
+  // 购物电商
+  ['淘宝', 'https://www.taobao.com', '阿里巴巴旗下购物平台', '购物电商', '购物 网购'],
+  ['天猫', 'https://www.tmall.com', '品牌正品购物平台', '购物电商', '天猫 购物'],
+  ['京东', 'https://www.jd.com', '自营电商与数码商城', '购物电商', 'jd 数码 购物'],
+  ['拼多多', 'https://www.pinduoduo.com', '社交拼团电商平台', '购物电商', 'pdd 拼团'],
+  ['苏宁易购', 'https://www.suning.com', '家电数码购物平台', '购物电商', '苏宁 电器'],
+  ['唯品会', 'https://www.vip.com', '品牌特卖平台', '购物电商', '特卖 折扣'],
+  ['得物', 'https://www.dewu.com', '潮流网购社区', '购物电商', '潮鞋 鉴定'],
+  ['闲鱼', 'https://www.goofish.com', '阿里旗下二手交易平台', '购物电商', '二手 交易'],
+  ['网易严选', 'https://you.163.com', '网易自营生活电商', '购物电商', '严选 品质'],
+  ['Amazon', 'https://www.amazon.com', '亚马逊网上商城', '购物电商', '亚马逊 海淘'],
+  ['eBay', 'https://www.ebay.com', '全球拍卖购物网站', '购物电商', '拍卖 海淘'],
+  // 新闻资讯
+  ['新华网', 'https://www.news.cn', '国家通讯社新华社官网', '新闻资讯', '新华社 官方'],
+  ['人民网', 'https://www.people.com.cn', '人民日报官网', '新闻资讯', '人民日报 官方'],
+  ['央视网', 'https://www.cctv.com', '中央电视台官网', '新闻资讯', 'cctv 央视'],
+  ['腾讯新闻', 'https://news.qq.com', '腾讯新闻资讯平台', '新闻资讯', '腾讯 资讯'],
+  ['网易新闻', 'https://news.163.com', '网易新闻资讯平台', '新闻资讯', '网易 资讯'],
+  ['今日头条', 'https://www.toutiao.com', '字节跳动资讯平台', '新闻资讯', '头条 字节 资讯'],
+  ['澎湃新闻', 'https://www.thepaper.cn', '专注时政与思想的媒体', '新闻资讯', '澎湃 时政'],
+  ['界面新闻', 'https://www.jiemian.com', '原创财经新闻媒体', '新闻资讯', '财经 商业'],
+  ['36氪', 'https://www.36kr.com', '科技创投媒体', '新闻资讯', '创业 投资 科技'],
+  ['虎嗅', 'https://www.huxiu.com', '科技与商业资讯', '新闻资讯', '科技 商业'],
+  ['IT之家', 'https://www.ithome.com', '数字科技资讯门户', '新闻资讯', '数码 科技'],
+  ['少数派', 'https://www.sspai.com', '高质量数字生活指南', '新闻资讯', '效率 数码 测评'],
+  ['虎扑', 'https://www.hupu.com', '体育潮流文化社区', '新闻资讯', '体育 篮球'],
+  ['BBC', 'https://www.bbc.com', '英国广播公司', '新闻资讯', '英国 新闻 英语'],
+  ['CNN', 'https://www.cnn.com', '美国有线电视新闻网', '新闻资讯', '美国 新闻 英语'],
+  // 实用工具
+  ['百度翻译', 'https://fanyi.baidu.com', '多语种即时在线翻译', '实用工具', '翻译 英语'],
+  ['DeepL', 'https://www.deepl.com', '高质量 AI 翻译工具', '实用工具', '翻译 deepl'],
+  ['Google 翻译', 'https://translate.google.com', '谷歌在线翻译', '实用工具', '谷歌 翻译'],
+  ['有道翻译', 'https://fanyi.youdao.com', '有道在线翻译词典', '实用工具', '翻译 词典 网易'],
+  ['Photopea', 'https://www.photopea.com', '网页版在线 PS 修图', '实用工具', 'ps 修图 抠图'],
+  ['TinyPNG', 'https://tinypng.com', '在线图片压缩', '实用工具', '图片 压缩'],
+  ['remove.bg', 'https://www.remove.bg', 'AI 一键抠图去背景', '实用工具', '抠图 去背景'],
+  ['草料二维码', 'https://cli.im', '二维码生成与美化', '实用工具', '二维码 生成'],
+  ['在线工具', 'https://tool.lu', '程序员工具箱合集', '实用工具', 'tool.lu 开发 工具箱'],
+  ['快递100', 'https://www.kuaidi100.com', '快递物流单号查询', '实用工具', '快递 物流 查询'],
+  ['中国天气网', 'https://www.weather.com.cn', '官方天气预报查询', '实用工具', '天气 预报'],
+  ['汉典', 'https://www.zdic.net', '在线汉语字典词典', '实用工具', '字典 汉语 成语'],
+  // 设计素材
+  ['Figma', 'https://www.figma.com', '在线 UI 设计协作工具', '设计素材', 'figma ui 原型'],
+  ['Canva 可画', 'https://www.canva.cn', '在线平面设计工具', '设计素材', 'canva 海报 封面'],
+  ['稿定设计', 'https://www.gaoding.com', '商业设计模板平台', '设计素材', '海报 模板'],
+  ['站酷', 'https://www.zcool.com.cn', '设计师作品社区', '设计素材', '设计 作品集 插画'],
+  ['iconfont', 'https://www.iconfont.cn', '阿里矢量图标库', '设计素材', '图标 矢量 svg'],
+  ['Unsplash', 'https://unsplash.com', '免费高清图库', '设计素材', '图片 免费 高清'],
+  ['Pexels', 'https://www.pexels.com', '免费图库与视频素材', '设计素材', '图片 免费 素材'],
+  ['Pixabay', 'https://pixabay.com', '免费版权图片插画', '设计素材', '图片 免费 插画'],
+  ['花瓣网', 'https://huaban.com', '图片采集灵感社区', '设计素材', '采集 灵感 图片'],
+  ['Dribbble', 'https://dribbble.com', '全球设计师社区', '设计素材', '设计 灵感 ui'],
+  ['Behance', 'https://www.behance.net', 'Adobe 设计作品社区', '设计素材', '作品集 adobe'],
+  // 邮箱服务
+  ['Gmail', 'https://mail.google.com', '谷歌免费邮箱', '邮箱服务', 'gmail 谷歌'],
+  ['QQ邮箱', 'https://mail.qq.com', '腾讯免费邮箱', '邮箱服务', 'qq 腾讯 邮箱'],
+  ['网易邮箱', 'https://mail.163.com', '163 免费邮箱', '邮箱服务', '163 网易 邮箱'],
+  ['Outlook', 'https://outlook.live.com', '微软免费邮箱', '邮箱服务', '微软 hotmail'],
+  // 出行生活
+  ['12306', 'https://www.12306.cn', '中国铁路官方购票平台', '出行生活', '火车票 高铁 12306'],
+  ['携程', 'https://www.ctrip.com', '机票酒店火车票预订', '出行生活', '酒店 机票 旅行'],
+  ['去哪儿', 'https://www.qunar.com', '机票酒店预订平台', '出行生活', '机票 酒店'],
+  ['飞猪', 'https://www.fliggy.com', '阿里旗下旅行平台', '出行生活', '机票 酒店 阿里'],
+  ['高德地图', 'https://www.amap.com', '地图导航与出行服务', '出行生活', '地图 导航'],
+  ['百度地图', 'https://map.baidu.com', '百度地图网页版', '出行生活', '地图 导航'],
+  ['腾讯地图', 'https://map.qq.com', '腾讯地图网页版', '出行生活', '地图 导航'],
+  ['美团', 'https://www.meituan.com', '本地生活服务平台', '出行生活', '外卖 团购'],
+  ['大众点评', 'https://www.dianping.com', '美食探店点评平台', '出行生活', '美食 探店'],
+  ['饿了么', 'https://www.ele.me', '网上订外卖平台', '出行生活', '外卖'],
+  ['滴滴出行', 'https://www.didiglobal.com', '网约车出行平台', '出行生活', '打车 网约车'],
+  // 金融理财
+  ['支付宝', 'https://www.alipay.com', '国内领先支付平台', '金融理财', '支付 转账'],
+  ['云闪付', 'https://www.95516.com', '银联官方支付平台', '金融理财', '银联 支付'],
+  ['东方财富', 'https://www.eastmoney.com', '财经门户与股票行情', '金融理财', '股票 财经 行情'],
+  ['天天基金', 'https://fund.eastmoney.com', '基金买卖平台', '金融理财', '基金 理财'],
+  ['雪球', 'https://xueqiu.com', '投资者社交平台', '金融理财', '股票 投资'],
+  ['同花顺', 'https://www.10jqka.com.cn', '股票行情交易软件', '金融理财', '炒股 行情'],
+  ['招商银行', 'https://www.cmbchina.com', '招商银行官网', '金融理财', '银行 招行'],
+  ['工商银行', 'https://www.icbc.com.cn', '工商银行官网', '金融理财', '银行 工行'],
+  ['建设银行', 'https://www.ccb.com', '建设银行官网', '金融理财', '银行 建行'],
+  ['中国银行', 'https://www.boc.cn', '中国银行官网', '金融理财', '银行 中行'],
+  // 游戏平台
+  ['Steam', 'https://store.steampowered.com', '全球最大游戏发行平台', '游戏平台', 'steam 买游戏'],
+  ['Epic Games', 'https://store.epicgames.com', 'Epic 游戏商城', '游戏平台', 'epic 喜加一 免费'],
+  ['TapTap', 'https://www.taptap.cn', '手游分享社区', '游戏平台', '手游 下载'],
+  ['4399', 'https://www.4399.com', '在线小游戏大全', '游戏平台', '小游戏 网页游戏'],
+  ['WeGame', 'https://www.wegame.com.cn', '腾讯游戏平台', '游戏平台', '腾讯 游戏'],
+  ['Nintendo', 'https://www.nintendo.com', '任天堂官网', '游戏平台', '任天堂 switch'],
+  ['PlayStation', 'https://www.playstation.com', '索尼 PlayStation 官网', '游戏平台', '索尼 ps5 主机'],
+  ['Xbox', 'https://www.xbox.com', '微软 Xbox 官网', '游戏平台', '微软 xbox'],
+  ['米哈游', 'https://www.mihoyo.com', '原神/崩坏系列开发商', '游戏平台', '原神 崩坏 星穹铁道'],
+  // 招聘求职
+  ['BOSS直聘', 'https://www.zhipin.com', '直接与老板谈的招聘平台', '招聘求职', '找工作 招聘'],
+  ['智联招聘', 'https://www.zhaopin.com', '综合招聘平台', '招聘求职', '找工作 招聘'],
+  ['前程无忧', 'https://www.51job.com', '综合招聘平台', '招聘求职', '51job 找工作'],
+  ['猎聘', 'https://www.liepin.com', '中高端人才招聘平台', '招聘求职', '猎头 招聘'],
+  ['拉勾网', 'https://www.lagou.com', '互联网行业招聘平台', '招聘求职', '互联网 招聘']
+];
+
+const PALETTE = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#f59e0b',
+  '#10b981', '#06b6d4', '#3b82f6', '#84cc16', '#14b8a6', '#a855f7'];
+
+const qInput = document.getElementById('q');
+const clearBtn = document.getElementById('clearBtn');
+const chipsEl = document.getElementById('chips');
+const rootEl = document.getElementById('root');
+const emptyEl = document.getElementById('empty');
+const statsEl = document.getElementById('stats');
+const toastEl = document.getElementById('toast');
+const themeBtn = document.getElementById('themeBtn');
+
+let query = '';
+let cat = '全部';
+let lastMatches = [];
+let toastTimer = null;
+
+function esc(t) {
+  return String(t).replace(/[&<>"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+}
+function hostOf(u) {
+  try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; }
+}
+function colorOf(name) {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  return PALETTE[h % PALETTE.length];
+}
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1600);
+}
+function copyText(text) {
+  const done = () => toast('已复制：' + text);
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast('复制失败，请手动复制'); }
+    ta.remove();
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done, fallback);
+  } else fallback();
+}
+
+function getTokens() {
+  return query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
+function matchSite(s, tokens) {
+  if (!tokens.length) return true;
+  const hay = (s[0] + ' ' + s[1] + ' ' + s[2] + ' ' + (s[4] || '') + ' ' + s[3]).toLowerCase();
+  return tokens.every(t => hay.includes(t));
+}
+
+function render() {
+  const tokens = getTokens();
+  lastMatches = SITES.filter(s => (cat === '全部' || s[3] === cat) && matchSite(s, tokens));
+
+  const reFor = t => new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  const hl = t => {
+    t = esc(t);
+    for (const tk of tokens) t = t.replace(reFor(tk), m => '<mark>' + m + '</mark>');
+    return t;
+  };
+
+  let html = '';
+  let shown = 0;
+  for (const [cname, icon] of CATS) {
+    const items = lastMatches.filter(s => s[3] === cname);
+    if (!items.length) continue;
+    shown += items.length;
+    html += '<section><h2><span>' + icon + '</span>' + esc(cname) +
+      '<span class="cnt">' + items.length + '</span></h2><div class="grid">';
+    for (const s of items) {
+      const [n, u, d] = s;
+      const host = hostOf(u);
+      const fav = 'https://www.google.com/s2/favicons?domain=' + encodeURIComponent(host) + '&sz=64';
+      html += '<div class="card" data-url="' + esc(u) + '">' +
+        '<div class="top">' +
+        '<span class="avatar" style="background:' + colorOf(n) + '">' + esc((n[0] || '?').toUpperCase()) +
+        '<img src="' + fav + '" alt="" loading="lazy" onload="this.classList.add(\'on\')" onerror="this.remove()"></span>' +
+        '<div class="meta"><div class="name">' + hl(n) + '</div><div class="desc">' + hl(d) + '</div></div></div>' +
+        '<button class="urlbtn" data-url="' + esc(u) + '" title="点击复制链接">⧉ ' + esc(host) + '</button>' +
+        '</div>';
+    }
+    html += '</div></section>';
+  }
+  rootEl.innerHTML = html;
+
+  if (lastMatches.length > 0 && shown === 0) shown = lastMatches.length; // 数据一致性兜底
+  emptyEl.classList.toggle('show', shown === 0);
+  statsEl.textContent = (query || cat !== '全部')
+    ? '匹配到 ' + shown + ' 个网站'
+    : '共收录 ' + SITES.length + ' 个网站 · ' + CATS.length + ' 个分类';
+}
+
+function renderChips() {
+  let html = '<button class="chip' + (cat === '全部' ? ' active' : '') + '" data-cat="全部">全部</button>';
+  for (const [cname, icon] of CATS) {
+    html += '<button class="chip' + (cat === cname ? ' active' : '') + '" data-cat="' + esc(cname) + '">' +
+      icon + ' ' + esc(cname) + '</button>';
+  }
+  chipsEl.innerHTML = html;
+}
+
+function setQuery(v) {
+  query = v;
+  qInput.value = v;
+  clearBtn.classList.toggle('show', !!v);
+  render();
+}
+
+qInput.addEventListener('input', () => setQuery(qInput.value));
+qInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (lastMatches.length) window.open(lastMatches[0][1], '_blank', 'noopener');
+  } else if (e.key === 'Escape') {
+    setQuery('');
+    qInput.blur();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== qInput) {
+    e.preventDefault();
+    qInput.focus();
+  }
+});
+
+clearBtn.addEventListener('click', () => { setQuery(''); qInput.focus(); });
+document.getElementById('resetBtn').addEventListener('click', () => { cat = '全部'; renderChips(); setQuery(''); });
+
+chipsEl.addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  cat = chip.dataset.cat;
+  renderChips();
+  render();
+});
+
+rootEl.addEventListener('click', e => {
+  const btn = e.target.closest('.urlbtn');
+  if (btn) { e.stopPropagation(); copyText(btn.dataset.url); return; }
+  const card = e.target.closest('.card');
+  if (card) window.open(card.dataset.url, '_blank', 'noopener');
+});
+
+function applyTheme(dark) {
+  document.body.classList.toggle('dark', dark);
+  themeBtn.textContent = dark ? '☀️' : '🌙';
+  try { localStorage.setItem('nav-theme', dark ? 'dark' : 'light'); } catch (e) {}
+}
+themeBtn.addEventListener('click', () => applyTheme(!document.body.classList.contains('dark')));
+let savedTheme = null;
+try { savedTheme = localStorage.getItem('nav-theme'); } catch (e) {}
+applyTheme(savedTheme ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+renderChips();
+render();
+</script>
+</body>
+</html>
